@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMC Pro - Projeto Final</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--p:#4f46e5;--p2:#06b6d4;--bg:#0f0f1a;--card:#fff;--muted:#6b7280;--ok:#10b981;--warn:#f59e0b;--danger:#ef4444}
+*{box-sizing:border-box;font-family:'Inter',sans-serif;margin:0;padding:0}
+body{background:radial-gradient(1200px 600px at 10% -10%, #4f46e5 0%, transparent 60%), radial-gradient(1000px 500px at 90% 0%, #06b6d4 0%, transparent 50%), var(--bg);min-height:100vh;display:flex;justify-content:center;padding:20px;color:#111}
+.app{width:100%;max-width:1100px;display:grid;grid-template-columns:380px 1fr;gap:20px}
+@media(max-width:900px){.app{grid-template-columns:1fr}}
+.card{background:var(--card);border-radius:24px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--p),var(--p2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:20px}
+h1{font-size:22px;font-weight:800} h2{font-size:18px;margin-bottom:12px}
+label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em}
+input{width:100%;padding:14px 16px;border:1px solid #eef0f4;background:#f8f9fc;border-radius:14px;margin:6px 0 14px;outline:none}
+input:focus{border-color:var(--p);background:#fff;box-shadow:0 0 0 4px rgba(79,70,229,.12)}
+.btn{width:100%;padding:14px;border:none;border-radius:14px;font-weight:700;cursor:pointer}
+.btn-primary{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff}
+.btn-ghost{background:#f3f4f6;color:#111}
+.badge{padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;display:inline-block}
+.badge-ok{background:#ecfdf5;color:#065f46}.badge-warn{background:#fffbeb;color:#92400e}.badge-danger{background:#fef2f2;color:#991b1b}
+.stat{border-radius:16px;padding:16px;background:#f8f9fc;border:1px solid #eef2f7}
+.icon-btn{border:none;background:#fff;width:34px;height:34px;border-radius:10px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:12px 18px;border-radius:999px;font-size:13px;display:none;z-index:999}
+.olho{position:absolute;right:14px;top:18px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="app">
+  <!-- ESQUERDA -->
+  <div>
+    <div class="card" id="card-login">
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:18px">
+        <div class="logo">IMC</div><div><h1>IMC Pro</h1><small style="color:var(--muted)">Projeto Final Completo</small></div>
+      </div>
+      <div id="login-box">
+        <h2>Entrar</h2>
+        <label>EMAIL</label><input id="email" placeholder="seu@email.com">
+        <label>SENHA</label>
+        <div style="position:relative">
+          <input id="senha" type="password" placeholder="•••••" style="padding-right:45px">
+          <span class="olho" onclick="verSenha()">👁️</span>
+        </div>
+        <button class="btn btn-primary" onclick="login()">Entrar</button>
+        <p style="text-align:center;margin:12px 0;color:var(--muted);font-size:12px">ou crie sua conta</p>
+        <label>NOME</label><input id="nome" placeholder="Ex: Renata">
+        <button class="btn btn-ghost" onclick="cadastrar()">Criar conta</button>
+        <div id="status" style="margin-top:10px;font-size:12px;color:#ef4444;text-align:center;min-height:15px"></div>
+      </div>
+      <div id="user-box" style="display:none">
+        <h2 id="ola"></h2><p id="email-logado" style="font-size:12px;color:var(--muted)"></p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0">
+          <div class="stat"><small style="color:var(--muted)">Média IMC</small><b id="media-imc" style="display:block;font-size:18px">--</b></div>
+          <div class="stat"><small style="color:var(--muted)">Registros</small><b id="total-reg" style="display:block;font-size:18px">0</b></div>
+        </div>
+        <button class="btn btn-ghost" onclick="logout()">Sair</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>Calcular IMC</h2>
+      <label>PESO (kg)</label><input id="peso" type="number" step="0.1" placeholder="Ex: 68.5">
+      <label>ALTURA (m)</label><input id="altura" type="number" step="0.01" placeholder="Ex: 1.70">
+      <button class="btn btn-primary" onclick="calcular()">Calcular e Salvar</button>
+      <div id="resultado" style="margin-top:14px;text-align:center"></div>
+      <div style="margin-top:14px">
+        <label>META DE PESO</label>
+        <div style="display:flex;gap:8px"><input id="peso-alvo" type="number" placeholder="Ex: 65"><button class="btn btn-ghost" style="width:90px" onclick="criarMeta()">Salvar</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIREITA -->
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h2>Histórico por Usuário</h2><span class="badge badge-ok" id="qtd">0 registros</span>
+    </div>
+    <div id="lista" style="display:grid;gap:10px"></div>
+    <div style="margin-top:20px">
+      <h2 style="font-size:14px">Minhas Metas</h2>
+      <div id="lista-metas" style="display:grid;gap:8px;margin-top:8px"></div>
+    </div>
+    <div style="margin-top:20px;padding:14px;background:#f8f9fc;border-radius:14px;font-size:12px;color:var(--muted)">
+      ✅ GET POST PUT DELETE OK | ✅ VIEW com JOIN: <b>/api/imc/view/completo</b> | ✅ Swagger: <a href="http://127.0.0.1:8000/docs" target="_blank">/docs</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = "http://127.0.0.1:8000";
+let user = JSON.parse(localStorage.getItem("imc_user")||"null");
+function toast(msg){ let t=document.getElementById("toast"); t.innerText=msg; t.style.display="block"; setTimeout(()=>t.style.display="none",2500); }
+function verSenha(){ let s=document.getElementById("senha"); s.type = s.type==="password"?"text":"password"; }
+if(user){ mostrarLogado(); carregar(); }
+function mostrarLogado(){
+  document.getElementById("login-box").style.display="none";
+  document.getElementById("user-box").style.display="block";
+  document.getElementById("ola").innerText="Olá, "+user.nome;
+  document.getElementById("email-logado").innerText=user.email;
+}
+function logout(){ localStorage.removeItem("imc_user"); location.reload(); }
+
+async function cadastrar(){
+  try{
+    document.getElementById("status").innerText="Criando...";
+    const r=await fetch(API+"/api/usuarios/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({nome:nome.value,email:email.value,senha:senha.value})});
+    const d=await r.json(); if(!r.ok) throw new Error(d.detail);
+    toast("✅ Conta criada! Faça login"); document.getElementById("status").innerText="✅ Criado! Faça login";
+  }catch(e){ document.getElementById("status").innerText="❌ "+e.message; toast("❌ "+e.message); }
+}
+async function login(){
+  try{
+    document.getElementById("status").innerText="Entrando...";
+    const r=await fetch(API+"/api/usuarios/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:email.value,senha:senha.value})});
+    const d=await r.json(); if(!r.ok) throw new Error(d.detail);
+    user=d; localStorage.setItem("imc_user",JSON.stringify(user)); mostrarLogado(); carregar(); toast("✅ Bem-vindo "+user.nome); document.getElementById("status").innerText="";
+  }catch(e){ document.getElementById("status").innerText="❌ "+e.message; }
+}
+async function calcular(){
+  if(!user) return toast("Faça login primeiro");
+  let p=parseFloat(peso.value.replace(",",".")); let a=parseFloat(altura.value.replace(",","."));
+  if(!p||!a) return toast("Digite peso e altura");
+  const r=await fetch(API+"/api/imc/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id_usuario:user.id_usuario,peso:p,altura:a})});
+  const d=await r.json(); if(!r.ok) return toast(d.detail);
+  let cor = d.categoria==="Peso normal"?"badge-ok": d.categoria==="Sobrepeso"?"badge-warn":"badge-danger";
+  document.getElementById("resultado").innerHTML=`<div style="font-size:30px;font-weight:800">${d.imc}</div><span class="badge ${cor}">${d.categoria}</span>`;
+  peso.value=""; altura.value=""; carregar(); toast("✅ Salvo!");
+}
+async function carregar(){
+  if(!user) return;
+  const r=await fetch(API+`/api/imc/historico/${user.id_usuario}`); const dados=await r.json();
+  document.getElementById("qtd").innerText=dados.length+" registros"; document.getElementById("total-reg").innerText=dados.length;
+  document.getElementById("lista").innerHTML = dados.length? dados.map(i=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;background:#f8f9fc;padding:14px;border-radius:14px">
+      <div><b>${i.peso}kg / ${i.altura}m</b> • IMC <b>${i.imc}</b><br><span class="badge ${i.categoria==='Peso normal'?'badge-ok': i.categoria==='Sobrepeso'?'badge-warn':'badge-danger'}" style="margin-top:4px">${i.categoria}</span><br><small style="color:#6b7280">${i.data_calculo}</small></div>
+      <div style="display:flex;gap:6px"><button class="icon-btn" onclick="editar(${i.id_medida||i.id_historico},${i.peso},${i.altura})">✏️</button><button class="icon-btn" onclick="deletar(${i.id_historico})">🗑️</button></div>
+    </div>`).join("") : "<p style='color:#6b7280;font-size:13px;text-align:center;padding:20px'>Sem dados ainda.</p>";
+  const rm=await fetch(API+`/api/imc/media/${user.id_usuario}`); const m=await rm.json(); document.getElementById("media-imc").innerText = m.media ? Number(m.media).toFixed(1) : "--";
+  const r2=await fetch(API+`/api/metas/${user.id_usuario}`); const metas=await r2.json();
+  document.getElementById("lista-metas").innerHTML = metas.map(m=>`<div style="display:flex;justify-content:space-between;background:#fff;padding:10px;border-radius:10px;border:1px solid #eef2f7"><span>Meta: ${m.peso_alvo}kg • ${m.status}</span><button class="icon-btn" onclick="delMeta(${m.id_meta})">x</button></div>`).join("") || "<small style='color:#6b7280'>Nenhuma meta</small>";
+}
+async function deletar(id){ if(!confirm("Apagar esse registro?")) return; await fetch(API+`/api/imc/historico/${id}`,{method:"DELETE"}); carregar(); toast("Removido"); }
+async function editar(id_medida,peso,altura){
+  let np=prompt("Novo peso:", peso); if(!np) return; let na=prompt("Nova altura:", altura); if(!na) return;
+  await fetch(API+`/api/imc/${id_medida}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({peso:parseFloat(np),altura:parseFloat(na)})});
+  toast("Atualizado"); carregar();
+}
+async function criarMeta(){
+  if(!user) return; let alvo=document.getElementById("peso-alvo").value; if(!alvo) return toast("Digite peso alvo");
+  await fetch(API+"/api/metas/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id_usuario:user.id_usuario,peso_alvo:parseFloat(alvo)})});
+  document.getElementById("peso-alvo").value=""; carregar(); toast("Meta criada");
+}
+async function delMeta(id){ await fetch(API+`/api/metas/${id}`,{method:"DELETE"}); carregar(); }
+</script>
+</body>
+</html>
