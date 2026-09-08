@@ -1,44 +1,76 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora IMC</title>
-<style>
-body{font-family:Arial;background:linear-gradient(135deg,#4F46E5,#06B6D4);min-height:100vh;display:flex;justify-content:center;align-items:center;margin:0}
-.card{background:white;padding:30px;border-radius:20px;width:90%;max-width:380px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
-h1{text-align:center;color:#4F46E5}
-input{width:100%;padding:12px;margin:8px 0 15px 0;border-radius:10px;border:1px solid #ddd;box-sizing:border-box}
-button{width:100%;padding:14px;background:linear-gradient(90deg,#4F46E5,#06B6D4);color:white;border:none;border-radius:12px;font-weight:bold;font-size:16px;cursor:pointer}
-#resultado{margin-top:20px;padding:15px;border-radius:10px;text-align:center;font-weight:bold;display:none}
-</style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMC Pro - Premium</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>body{font-family:'Poppins',sans-serif}</style>
 </head>
-<body>
-<div class="card">
-<h1>Calculadora IMC</h1>
-<label>Peso (kg)</label>
-<input type="number" id="peso" placeholder="Ex: 68.5" step="0.1">
-<label>Altura (m)</label>
-<input type="number" id="altura" placeholder="Ex: 1.70" step="0.01">
-<button onclick="calcular()">Calcular IMC</button>
-<div id="resultado"></div>
+<body class="bg-gradient-to-br from-indigo-600 via-purple-600 to-cyan-400 min-h-screen flex items-center justify-center p-4">
+<div class="w-full max-w-md">
+<div id="loginScreen" class="bg-white/95 backdrop-blur rounded-[24px] p-8 shadow-2xl">
+<div class="text-center mb-6"><h1 class="text-3xl font-bold text-indigo-600">IMC Pro</h1><p class="text-gray-500 text-sm">Seu controle de saúde premium</p></div>
+<div id="loginForm">
+<input id="loginEmail" type="email" placeholder="E-mail" class="w-full p-3 rounded-xl border border-gray-200 mb-3">
+<input id="loginPass" type="password" placeholder="Senha" class="w-full p-3 rounded-xl border border-gray-200 mb-4">
+<button onclick="login()" class="w-full bg-gradient-to-r from-indigo-600 to-cyan-400 text-white p-3 rounded-xl font-bold">ENTRAR</button>
+<p class="text-center text-sm mt-4 text-gray-500">Não tem conta? <span onclick="toggleForm()" class="text-indigo-600 font-bold cursor-pointer">Cadastre-se</span></p>
+</div>
+<div id="cadForm" class="hidden">
+<input id="cadName" type="text" placeholder="Nome completo" class="w-full p-3 rounded-xl border border-gray-200 mb-3">
+<input id="cadEmail" type="email" placeholder="E-mail" class="w-full p-3 rounded-xl border border-gray-200 mb-3">
+<input id="cadPass" type="password" placeholder="Senha (min 6)" class="w-full p-3 rounded-xl border border-gray-200 mb-4">
+<button onclick="cadastrar()" class="w-full bg-gradient-to-r from-indigo-600 to-cyan-400 text-white p-3 rounded-xl font-bold">CRIAR CONTA</button>
+<p class="text-center text-sm mt-4 text-gray-500">Já tem conta? <span onclick="toggleForm()" class="text-indigo-600 font-bold cursor-pointer">Entrar</span></p>
+</div>
+</div>
+<div id="appScreen" class="hidden bg-white/95 backdrop-blur rounded-[24px] p-8 shadow-2xl">
+<div class="flex justify-between items-center mb-6"><h2 class="font-bold text-indigo-600">Olá, <span id="userName"></span>!</h2><button onclick="logout()" class="text-sm text-red-500 font-bold">Sair</button></div>
+<h1 class="text-2xl font-bold text-center mb-1">Calculadora IMC</h1>
+<label class="text-sm font-semibold">Peso (kg)</label>
+<input id="peso" type="number" step="0.1" placeholder="Ex: 68.5" class="w-full p-3 rounded-xl border border-gray-200 mb-3 mt-1">
+<label class="text-sm font-semibold">Altura (m)</label>
+<input id="altura" type="number" step="0.01" placeholder="Ex: 1.70" class="w-full p-3 rounded-xl border border-gray-200 mb-4 mt-1">
+<button onclick="calcularIMC()" class="w-full bg-gradient-to-r from-indigo-600 to-cyan-400 text-white p-3 rounded-xl font-bold text-lg">Calcular meu IMC</button>
+<div id="resultado" class="hidden mt-6 p-4 rounded-xl text-center"></div>
+<div id="barra" class="hidden mt-4"><div class="h-3 w-full rounded-full bg-gradient-to-r from-blue-400 via-green-400 via-yellow-400 to-red-500"></div><div id="ponteiro" class="w-3 h-3 bg-black rounded-full -mt-3 transition-all"></div></div>
+</div>
 </div>
 <script>
-function calcular(){
- let p=parseFloat(document.getElementById('peso').value);
- let a=parseFloat(document.getElementById('altura').value);
- if(!p||!a){alert('Preencha peso e altura');return}
- let imc=p/(a*a);
- let status='';
- if(imc<18.5)status='Abaixo do peso';
- else if(imc<24.9)status='Peso normal';
- else if(imc<29.9)status='Sobrepeso';
- else status='Obesidade';
- let res=document.getElementById('resultado');
- res.style.display='block';
- res.style.background='#EEF2FF';
- res.innerHTML='Seu IMC: '+imc.toFixed(2)+'<br>'+status;
+function toggleForm(){document.getElementById('loginForm').classList.toggle('hidden');document.getElementById('cadForm').classList.toggle('hidden')}
+function cadastrar(){
+ let n=document.getElementById('cadName').value, e=document.getElementById('cadEmail').value, p=document.getElementById('cadPass').value;
+ if(!n||!e||p.length<6){alert('Preencha nome, email e senha com 6+ caracteres');return}
+ localStorage.setItem('imc_user',JSON.stringify({nome:n,email:e,senha:p}));
+ alert('Conta criada! Faça login');toggleForm();
 }
+function login(){
+ let e=document.getElementById('loginEmail').value,p=document.getElementById('loginPass').value;
+ let u=JSON.parse(localStorage.getItem('imc_user')||'null');
+ if(u && u.email===e && u.senha===p){localStorage.setItem('imc_logado','1');mostrarApp(u.nome)}else{alert('E-mail ou senha incorretos. Cadastre-se primeiro!')}
+}
+function mostrarApp(nome){
+ document.getElementById('loginScreen').classList.add('hidden');
+ document.getElementById('appScreen').classList.remove('hidden');
+ document.getElementById('userName').innerText=nome||JSON.parse(localStorage.getItem('imc_user')).nome;
+}
+function logout(){localStorage.removeItem('imc_logado');location.reload()}
+function calcularIMC(){
+ let p=parseFloat(document.getElementById('peso').value), a=parseFloat(document.getElementById('altura').value);
+ if(!p||!a){alert('Preencha peso e altura');return}
+ let imc=p/(a*a), cat='', cor='';
+ if(imc<18.5){cat='Abaixo do peso';cor='bg-blue-100 text-blue-700'}
+ else if(imc<24.9){cat='Peso normal - Parabéns!';cor='bg-green-100 text-green-700'}
+ else if(imc<29.9){cat='Sobrepeso';cor='bg-yellow-100 text-yellow-700'}
+ else{cat='Obesidade';cor='bg-red-100 text-red-700'}
+ let r=document.getElementById('resultado');
+ r.className='mt-6 p-4 rounded-xl text-center '+cor; r.classList.remove('hidden');
+ r.innerHTML='<div class="text-3xl font-bold">'+imc.toFixed(2)+'</div><div class="font-semibold">'+cat+'</div>';
+ let pos=Math.min(100,Math.max(0,(imc-10)*5)); document.getElementById('barra').classList.remove('hidden');
+ document.getElementById('ponteiro').style.marginLeft=pos+'%';
+}
+window.onload=()=>{let log=localStorage.getItem('imc_logado');let u=JSON.parse(localStorage.getItem('imc_user')||'null');if(log&&u)mostrarApp(u.nome)}
 </script>
 </body>
 </html>
