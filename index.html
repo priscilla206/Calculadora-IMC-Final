@@ -25,6 +25,7 @@
 <p class="text-center text-sm mt-4 text-gray-500">Já tem conta? <span onclick="toggleForm()" class="text-indigo-600 font-bold cursor-pointer">Entrar</span></p>
 </div>
 </div>
+
 <div id="appScreen" class="hidden bg-white/95 backdrop-blur rounded-[24px] p-8 shadow-2xl">
 <div class="flex justify-between items-center mb-6"><h2 class="font-bold text-indigo-600">Olá, <span id="userName"></span>!</h2><button onclick="logout()" class="text-sm text-red-500 font-bold">Sair</button></div>
 <h1 class="text-2xl font-bold text-center mb-1">Calculadora IMC</h1>
@@ -35,6 +36,12 @@
 <button onclick="calcularIMC()" class="w-full bg-gradient-to-r from-indigo-600 to-cyan-400 text-white p-3 rounded-xl font-bold text-lg">Calcular meu IMC</button>
 <div id="resultado" class="hidden mt-6 p-4 rounded-xl text-center"></div>
 <div id="barra" class="hidden mt-4"><div class="h-3 w-full rounded-full bg-gradient-to-r from-blue-400 via-green-400 via-yellow-400 to-red-500"></div><div id="ponteiro" class="w-3 h-3 bg-black rounded-full -mt-3 transition-all"></div></div>
+
+<div class="mt-8 border-t pt-4">
+<h3 class="font-bold text-gray-700 mb-3">📊 Meu Histórico</h3>
+<div id="historico" class="space-y-2 max-h-48 overflow-y-auto"></div>
+<button onclick="limparHistorico()" class="text-xs text-gray-400 mt-2">Limpar histórico</button>
+</div>
 </div>
 </div>
 <script>
@@ -54,6 +61,7 @@ function mostrarApp(nome){
  document.getElementById('loginScreen').classList.add('hidden');
  document.getElementById('appScreen').classList.remove('hidden');
  document.getElementById('userName').innerText=nome||JSON.parse(localStorage.getItem('imc_user')).nome;
+ carregarHistorico();
 }
 function logout(){localStorage.removeItem('imc_logado');location.reload()}
 function calcularIMC(){
@@ -61,7 +69,7 @@ function calcularIMC(){
  if(!p||!a){alert('Preencha peso e altura');return}
  let imc=p/(a*a), cat='', cor='';
  if(imc<18.5){cat='Abaixo do peso';cor='bg-blue-100 text-blue-700'}
- else if(imc<24.9){cat='Peso normal - Parabéns!';cor='bg-green-100 text-green-700'}
+ else if(imc<24.9){cat='Peso normal';cor='bg-green-100 text-green-700'}
  else if(imc<29.9){cat='Sobrepeso';cor='bg-yellow-100 text-yellow-700'}
  else{cat='Obesidade';cor='bg-red-100 text-red-700'}
  let r=document.getElementById('resultado');
@@ -69,7 +77,21 @@ function calcularIMC(){
  r.innerHTML='<div class="text-3xl font-bold">'+imc.toFixed(2)+'</div><div class="font-semibold">'+cat+'</div>';
  let pos=Math.min(100,Math.max(0,(imc-10)*5)); document.getElementById('barra').classList.remove('hidden');
  document.getElementById('ponteiro').style.marginLeft=pos+'%';
+ salvarHistorico(imc.toFixed(2),cat);
 }
+function salvarHistorico(imc,cat){
+ let hist=JSON.parse(localStorage.getItem('imc_hist')||'[]');
+ hist.unshift({data:new Date().toLocaleString('pt-BR'),imc:imc,cat:cat});
+ localStorage.setItem('imc_hist',JSON.stringify(hist.slice(0,20)));
+ carregarHistorico();
+}
+function carregarHistorico(){
+ let hist=JSON.parse(localStorage.getItem('imc_hist')||'[]');
+ let div=document.getElementById('historico');
+ if(hist.length==0){div.innerHTML='<p class="text-xs text-gray-400">Nenhum cálculo ainda</p>';return}
+ div.innerHTML=hist.map(h=>'<div class="p-2 bg-gray-50 rounded-lg text-xs flex justify-between"><span>'+h.data+'</span><span class="font-bold">'+h.imc+' - '+h.cat+'</span></div>').join('');
+}
+function limparHistorico(){localStorage.removeItem('imc_hist');carregarHistorico();}
 window.onload=()=>{let log=localStorage.getItem('imc_logado');let u=JSON.parse(localStorage.getItem('imc_user')||'null');if(log&&u)mostrarApp(u.nome)}
 </script>
 </body>
